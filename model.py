@@ -27,14 +27,14 @@ class CNNSentence(nn.Module):
 		nn.init.uniform_(self.word_emb.weight.data[0], -0.05, 0.05)
 
 		for filter_size in args.FILTER_SIZES:
-			conv = nn.Conv1d(self.in_channels, args.num_feature_maps, args.word_dim * filter_size, stride=args.word_dim).to(torch.device(self.args.device))
+			conv = nn.Conv1d(self.in_channels, args.num_feature_maps, args.word_dim * filter_size, stride=args.word_dim)
 			setattr(self, 'conv_' + str(filter_size), conv)
 
-		self.fc = nn.Linear(len(args.FILTER_SIZES) * 100, args.class_size).to(torch.device(self.args.device))
+		self.fc = nn.Linear(len(args.FILTER_SIZES) * 100, args.class_size)
 
 	def forward(self, batch):
 		
-		x = batch.text.to(torch.device(self.args.device))
+		x = batch.text
 		batch_size, seq_len = x.size()
 
 		conv_in = self.word_emb(x).view(batch_size, 1, -1)
@@ -47,7 +47,7 @@ class CNNSentence(nn.Module):
 																													self.args.num_feature_maps)
 			for filter_size in self.args.FILTER_SIZES]
 
-		out = torch.cat(conv_result, 1)
+		out = torch.cat(conv_result, 1).to(torch.device(self.args.device))
 		out = F.dropout(out, p=self.args.dropout, training=self.training)
 		out = self.fc(out)
 
