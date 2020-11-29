@@ -91,11 +91,11 @@ def main():
 	parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static, multichannel")
 	parser.add_argument('--num-feature-maps', default=100, type=int)
 
-	args = parser.parse_args()
+	args = parser.parse_args().to(torch.device(args.device))
 
 	print('loading', args.dataset, 'data...')
-	data = DATA(args)
-	vectors = getVectors(args, data)
+	data = DATA(args).to(torch.device(args.device))
+	vectors = getVectors(args, data).to(torch.device(args.device))
 
 	setattr(args, 'word_vocab_size', len(data.TEXT.vocab))
 	setattr(args, 'class_size', len(data.LABEL.vocab))
