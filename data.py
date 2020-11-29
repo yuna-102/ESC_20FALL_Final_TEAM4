@@ -11,7 +11,7 @@ def getVectors(args, data):
 	vectors = []
 
 	if args.mode != 'rand':
-		word2vec = KeyedVectors.load_word2vec_format('./GoogleNews-vectors-negative300.bin', binary=True)
+		word2vec = KeyedVectors.load_word2vec_format('/ESC_20FALL_Final_TEAM4/GoogleNews-vectors-negative300.bin', binary=True)
 
 		for i in range(len(data.TEXT.vocab)):
 			word = data.TEXT.vocab.itos[i]
