@@ -6,10 +6,6 @@ from torchtext import datasets
 from gensim.models import KeyedVectors
 
 import mydatasets
-import wget
-
-url = "https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz"
-wget.download(url)
 
 def getVectors(args, data):
 	vectors = []
