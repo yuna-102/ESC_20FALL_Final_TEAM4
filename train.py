@@ -1,102 +1,121 @@
+import argparse
+import copy
 import os
-import sys
 import torch
-import torch.autograd as autograd
-import torch.nn.functional as F
+
+from torch import nn, optim
+from tensorboardX import SummaryWriter
+from time import gmtime, strftime
+
+from model import CNNSentence
+from data import DATA, getVectors
+from test import test
 
 
-def train(train_iter, dev_iter, model, args):
-    if args.cuda:
-        model.cuda()
+def train(args, data, vectors):
+	model = CNNSentence(args, data, vectors)
+	model.to(torch.device(args.device))
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+	parameters = filter(lambda p: p.requires_grad, model.parameters())
+	optimizer = optim.Adadelta(parameters, lr=args.learning_rate)
+	criterion = nn.CrossEntropyLoss()
 
-    steps = 0
-    best_acc = 0
-    last_step = 0
-    for epoch in range(1, args.epochs+1):
-        for batch in train_iter:
-            model.train()
-            feature, target = batch.text, batch.label
-            feature.t_(), target.sub_(1)  # batch first, index align
-            if args.cuda:
-                feature, target = feature.cuda(), target.cuda()
+	writer = SummaryWriter(log_dir='runs/' + args.model_time)
 
-            optimizer.zero_grad()
-            logit = model(feature)
-            loss = F.cross_entropy(logit, target)
-            loss.backward()
-            optimizer.step()
+	model.train()
+	acc, loss, size, last_epoch = 0, 0, 0, -1
+	max_test_acc = 0
 
-            steps += 1
-            if steps % args.log_interval == 0:
-                corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
-                accuracy = 100.0 * corrects/batch.batch_size
-                sys.stdout.write(
-                    '\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(steps, 
-                                                                             loss.item(), 
-                                                                             accuracy.item(),
-                                                                             corrects.item(),
-                                                                             batch.batch_size))
-            if steps % args.test_interval == 0:
-                dev_acc = eval(dev_iter, model, args)
-                if dev_acc > best_acc:
-                    best_acc = dev_acc
-                    last_step = steps
-                    if args.save_best:
-                        save(model, args.save_dir, 'best', steps)
-                else:
-                    if steps - last_step >= args.early_stop:
-                        print('early stop by {} steps.'.format(args.early_stop))
-            elif steps % args.save_interval == 0:
-                save(model, args.save_dir, 'snapshot', steps)
+	print_summary = False
+	iterator = data.train_iter
+	for i, batch in enumerate(iterator):
+		present_epoch = int(iterator.epoch)
+		if present_epoch == args.epoch:
+			break
+		if present_epoch > last_epoch:
+			print('epoch:', present_epoch + 1)
+			print_summary = True
+		last_epoch = present_epoch
 
+		pred = model(batch)
 
-def eval(data_iter, model, args):
-    model.eval()
-    corrects, avg_loss = 0, 0
-    for batch in data_iter:
-        feature, target = batch.text, batch.label
-        feature.t_(), target.sub_(1)  # batch first, index align
-        if args.cuda:
-            feature, target = feature.cuda(), target.cuda()
+		optimizer.zero_grad()
+		batch_loss = criterion(pred, batch.label)
+		loss += batch_loss.item()
+		batch_loss.backward()
+		nn.utils.clip_grad_norm_(parameters, max_norm=args.norm_limit)
+		optimizer.step()
 
-        logit = model(feature)
-        loss = F.cross_entropy(logit, target, size_average=False)
+		_, pred = pred.max(dim=1)
+		acc += (pred == batch.label).sum().float()
+		size += len(pred)
 
-        avg_loss += loss.item()
-        corrects += (torch.max(logit, 1)
-                     [1].view(target.size()).data == target.data).sum()
+		if print_summary:
+			print_summary = False
+			acc /= size
+			acc = acc.cpu().item()
+			test_loss, test_acc = test(model, data)
+			c = present_epoch
 
-    size = len(data_iter.dataset)
-    avg_loss /= size
-    accuracy = 100.0 * corrects/size
-    print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss, 
-                                                                       accuracy, 
-                                                                       corrects, 
-                                                                       size))
-    return accuracy
+			writer.add_scalar('loss/train', loss, c)
+			writer.add_scalar('acc/train', acc, c)
+			writer.add_scalar('loss/test', test_loss, c)
+			writer.add_scalar('acc/test', test_acc, c)
+
+			print(f'train loss: {loss:.3f} / test loss: {test_loss:.3f}'
+				  f' / train acc: {acc:.3f} / test acc: {test_acc:.3f}')
+
+			if test_acc > max_test_acc:
+				max_test_acc = test_acc
+				best_model = copy.deepcopy(model)
+
+			acc, loss, size = 0, 0, 0
+			model.train()
+
+	writer.close()
+	print(f'max test acc: {max_test_acc:.3f}')
+
+	return best_model
 
 
-def predict(text, model, text_field, label_feild, cuda_flag):
-    assert isinstance(text, str)
-    model.eval()
-    # text = text_field.tokenize(text)
-    text = text_field.preprocess(text)
-    text = [[text_field.vocab.stoi[x] for x in text]]
-    x = torch.tensor(text)
-    x = autograd.Variable(x)
-    if cuda_flag:
-        x = x.cuda()
-    print(x)
-    output = model(x)
-    _, predicted = torch.max(output, 1)
-    return label_feild.vocab.itos[predicted.item()+1]
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--batch-size', default=50, type=int)
+	parser.add_argument('--dataset', default='TREC', help="available datasets: MR, TREC, SST-1, SST-2, SUBJ")
+	parser.add_argument('--dropout', default=0.5, type=float)
+	parser.add_argument('--epoch', default=300, type=int)
+	parser.add_argument('--gpu', default=0, type=int)
+	parser.add_argument('--learning-rate', default=0.1, type=float)
+	parser.add_argument('--word-dim', default=300, type=int)
+	parser.add_argument('--norm-limit', default=3.0, type=float)
+	parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static, multichannel")
+	parser.add_argument('--num-feature-maps', default=100, type=int)
+
+	args = parser.parse_args()
+
+	print('loading', args.dataset, 'data...')
+	data = DATA(args)
+	vectors = getVectors(args, data)
+
+	setattr(args, 'word_vocab_size', len(data.TEXT.vocab))
+	setattr(args, 'class_size', len(data.LABEL.vocab))
+	setattr(args, 'model_time', strftime('%H:%M:%S', gmtime()))
+	setattr(args, 'FILTER_SIZES', [3, 4, 5])
+
+	if args.gpu > -1:
+		setattr(args, 'device', "cuda:0")
+	else:
+		setattr(args, 'device', "cpu")
+
+	print('training start!')
+	best_model = train(args, data, vectors)
+
+	if not os.path.exists('saved_models'):
+		os.makedirs('saved_models')
+	torch.save(best_model.state_dict(), f'saved_models/CNN_Sentece_{args.dataset}_{args.model_time}.pt')
+
+	print('training finished!')
 
 
-def save(model, save_dir, save_prefix, steps):
-    if not os.path.isdir(save_dir):
-        os.makedirs(save_dir)
-    save_prefix = os.path.join(save_dir, save_prefix)
-    save_path = '{}_steps_{}.pt'.format(save_prefix, steps)
-    torch.save(model.state_dict(), save_path)
+if __name__ == '__main__':
+	main()

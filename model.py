@@ -1,41 +1,66 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 
-class CNN_Text(nn.Module):
-    
-    def __init__(self, args):
-        super(CNN_Text, self).__init__()
-        self.args = args
-        
-        V = args.embed_num
-        D = args.embed_dim
-        C = args.class_num
-        Ci = 1
-        Co = args.kernel_num
-        Ks = args.kernel_sizes
+class CNNSentence(nn.Module):
 
-        self.embed = nn.Embedding(V, D)
-        self.convs = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
-        self.dropout = nn.Dropout(args.dropout)
-        self.fc1 = nn.Linear(len(Ks) * Co, C)
+	def __init__(self, args, data, vectors):
+		super(CNNSentence, self).__init__()
 
-        if self.args.static:
-            self.embed.weight.requires_grad = False
+		self.args = args
 
-    def forward(self, x):
-        x = self.embed(x)  # (N, W, D)
-    
-        x = x.unsqueeze(1)  # (N, Ci, W, D)
+		self.word_emb = nn.Embedding(args.word_vocab_size, args.word_dim, padding_idx=1)
+		# initialize word embedding with pretrained word2vec
+		if args.mode != 'rand':
+			self.word_emb.weight.data.copy_(torch.from_numpy(vectors))
+		if args.mode in ('static', 'multichannel'):
+			self.word_emb.weight.requires_grad = False
+		if args.mode == 'multichannel':
+			self.word_emb_multi = nn.Embedding(args.word_vocab_size, args.word_dim, padding_idx=1)
+			self.word_emb_multi.weight.data.copy_(torch.from_numpy(vectors))
+			self.in_channels = 2
+		else:
+			self.in_channels = 1
 
-        x = [F.relu(conv(x)).squeeze(3) for conv in self.convs]  # [(N, Co, W), ...]*len(Ks)
+		# <unk> vectors is randomly initialized
+		nn.init.uniform_(self.word_emb.weight.data[0], -0.05, 0.05)
 
-        x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x]  # [(N, Co), ...]*len(Ks)
+		for filter_size in args.FILTER_SIZES:
+			conv = nn.Conv1d(self.in_channels, args.num_feature_maps, args.word_dim * filter_size, stride=args.word_dim)
+			setattr(self, 'conv_' + str(filter_size), conv)
 
-        x = torch.cat(x, 1)
+		self.fc = nn.Linear(len(args.FILTER_SIZES) * 100, args.class_size)
 
-        x = self.dropout(x)  # (N, len(Ks)*Co)
-        logit = self.fc1(x)  # (N, C)
-        return logit
+	def forward(self, batch):
+		x = batch.text
+		batch_size, seq_len = x.size()
+
+		conv_in = self.word_emb(x).view(batch_size, 1, -1)
+		if self.args.mode == 'multichannel':
+			conv_in_multi = self.word_emb_multi(x).view(batch_size, 1, -1)
+			conv_in = torch.cat((conv_in, conv_in_multi), 1)
+
+		conv_result = [
+			F.max_pool1d(F.relu(getattr(self, 'conv_' + str(filter_size))(conv_in)), seq_len - filter_size + 1).view(-1,
+																													self.args.num_feature_maps)
+			for filter_size in self.args.FILTER_SIZES]
+
+		out = torch.cat(conv_result, 1)
+		out = F.dropout(out, p=self.args.dropout, training=self.training)
+		out = self.fc(out)
+
+		return out
+
+
+
+
+
+
+
+
+
+
+
+
+
