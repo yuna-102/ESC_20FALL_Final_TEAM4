@@ -91,7 +91,7 @@ def main():
 	parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static, multichannel")
 	parser.add_argument('--num-feature-maps', default=100, type=int)
 
-	args = parser.parse_args().to(torch.device(args.device))
+	args = parser.parse_args()
 
 	print('loading', args.dataset, 'data...')
 	data = DATA(args).to(torch.device(args.device))
