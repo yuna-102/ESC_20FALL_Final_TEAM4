@@ -33,8 +33,8 @@ class CNNSentence(nn.Module):
 		self.fc = nn.Linear(len(args.FILTER_SIZES) * 100, args.class_size)
 
 	def forward(self, batch):
-		device= torch.device("cuda" if torch.cuda.is_available() else "cpu")
-		x = batch.text.to(device)
+		
+		x = batch.text.
 		batch_size, seq_len = x.size()
 
 		conv_in = self.word_emb(x).view(batch_size, 1, -1)
