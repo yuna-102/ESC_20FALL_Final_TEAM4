@@ -7,7 +7,8 @@ from gensim.models import KeyedVectors
 
 import mydatasets
 
-!wget -c "https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz"
+wget https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz
+
 def getVectors(args, data):
 	vectors = []
 	
