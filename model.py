@@ -34,7 +34,7 @@ class CNNSentence(nn.Module):
 
 	def forward(self, batch):
 		
-		x = batch.text.
+		x = batch.text
 		batch_size, seq_len = x.size()
 
 		conv_in = self.word_emb(x).view(batch_size, 1, -1)
