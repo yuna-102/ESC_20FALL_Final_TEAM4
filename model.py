@@ -37,7 +37,7 @@ class CNNSentence(nn.Module):
 		x = batch.text
 		batch_size, seq_len = x.size()
 
-		conv_in = self.word_emb(x).view(batch_size, 1, -1)
+		conv_in = self.word_emb(x).view(batch_size, 1, -1).to(torch.device(self.args.device))
 		if self.args.mode == 'multichannel':
 			conv_in_multi = self.word_emb_multi(x).view(batch_size, 1, -1)
 			conv_in = torch.cat((conv_in, conv_in_multi), 1)
