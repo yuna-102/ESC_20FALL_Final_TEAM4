@@ -36,6 +36,7 @@ def train(args, data, vectors):
 			print('epoch:', present_epoch + 1)
 			print_summary = True
 		last_epoch = present_epoch
+		batch = batch.to(device, dtype = torch.long)
 
 		pred = model(batch)
 
@@ -94,8 +95,8 @@ def main():
 	args = parser.parse_args()
 
 	print('loading', args.dataset, 'data...')
-	data = DATA(args)
-	vectors = getVectors(args, data)
+	data = DATA(args).to(torch.device(args.device))
+	vectors = getVectors(args, data).to(torch.device(args.device))
 
 	setattr(args, 'word_vocab_size', len(data.TEXT.vocab))
 	setattr(args, 'class_size', len(data.LABEL.vocab))
