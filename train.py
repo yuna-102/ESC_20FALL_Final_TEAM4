@@ -13,7 +13,7 @@ from test import test
 
 
 def train(args, data, vectors):
-	data = data.to(torch.device(args.device))
+	
 	model = CNNSentence(args, data, vectors)
 	model.to(torch.device(args.device))
 
