@@ -95,8 +95,8 @@ def main():
 	args = parser.parse_args()
 
 	print('loading', args.dataset, 'data...')
-	data = DATA(args).to(torch.device(args.device))
-	vectors = getVectors(args, data).to(torch.device(args.device))
+	data = DATA(args)
+	vectors = getVectors(args, data)
 
 	setattr(args, 'word_vocab_size', len(data.TEXT.vocab))
 	setattr(args, 'class_size', len(data.LABEL.vocab))
