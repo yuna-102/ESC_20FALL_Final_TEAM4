@@ -13,6 +13,7 @@ from test import test
 
 
 def train(args, data, vectors):
+	data = data.to(torch.device(args.device))
 	model = CNNSentence(args, data, vectors)
 	model.to(torch.device(args.device))
 
@@ -36,7 +37,7 @@ def train(args, data, vectors):
 			print('epoch:', present_epoch + 1)
 			print_summary = True
 		last_epoch = present_epoch
-		batch = batch.to(device, dtype = torch.long)
+		
 
 		pred = model(batch)
 
