@@ -12,7 +12,7 @@ from torch.utils.data import (TensorDataset, DataLoader, RandomSampler,
                               SequentialSampler)
 from nltk.tokenize import word_tokenize
 from collections import defaultdict
-
+import requests
 
 def load_data():
   # Download Datasets

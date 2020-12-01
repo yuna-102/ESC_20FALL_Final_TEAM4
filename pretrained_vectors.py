@@ -1,6 +1,9 @@
 from tqdm import tqdm_notebook
 import gensim
 import zipfile
+import requests
+import gzip
+
 
 def load_pretrained_fasttext(word2idx, fname):
     """Load pretrained vectors and create embedding layers.
