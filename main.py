@@ -59,3 +59,6 @@ def main():
                                                 learning_rate=args.learning_rate,
                                                 dropout=dropout)
     train.train(cnn_non_static, optimizer, train_dataloader, val_dataloader, epochs=20)
+
+if __name__ == '__main__':
+	main()
