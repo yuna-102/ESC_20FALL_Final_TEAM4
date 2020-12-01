@@ -45,7 +45,7 @@ def main():
   elif args.mode == 'static':
     # CNN-static: fastText pretrained word vectors are used and freezed during training.
     train.set_seed(42)
-    cnn_static, optimizer = initilize_model(pretrained_embedding=pretrained_vectors.get_vector(args.pretrained-word-vectors),
+    cnn_static, optimizer = model.initilize_model(pretrained_embedding=pretrained_vectors.get_vector(args.pretrained_word_vectors),
                                             freeze_embedding=True,
                                             learning_rate=args.learning_rate,
                                             dropout=args.dropout)
@@ -54,7 +54,7 @@ def main():
   else:
     # CNN-non-static: fastText pretrained word vectors are fine-tuned during training.
     train.set_seed(42)
-    cnn_non_static, optimizer = initilize_model(pretrained_embedding=pretrained_vectors.get_vector(args.pretrained-word-vectors),
+    cnn_non_static, optimizer = model.initilize_model(pretrained_embedding = pretrained_vectors.get_vector(args.pretrained_word_vectors),
                                                 freeze_embedding=False,
                                                 learning_rate=args.learning_rate,
                                                 dropout=dropout)

@@ -3,7 +3,7 @@ import gensim
 import zipfile
 import requests
 import gzip
-
+import torch
 
 def load_pretrained_fasttext(word2idx, fname):
     """Load pretrained vectors and create embedding layers.
@@ -81,7 +81,7 @@ def load_pretrained_word2vec(word2idx, fname):
 
 def get_vector(input_vectors):
     word_vectors = input_vectors
-    if vectors == "fasttext":
+    if word_vectors == "fasttext":
       print("Loading pretrained vectors...")
       url = "https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip"
       target_path = 'crawl-300d-2M.vec.zip'
@@ -93,10 +93,11 @@ def get_vector(input_vectors):
       with zipfile.ZipFile('crawl-300d-2M.vec.zip', 'r') as zip_ref:
         zip_ref.extractall()
 
-      embeddings = load_pretrained_vectors(word2idx, "fastText/crawl-300d-2M.vec")
+      embeddings = load_pretrained_fasttext(word2idx, "fastText/crawl-300d-2M.vec")
       embeddings = torch.tensor(embeddings)
          
     elif word_vectors == "Word2Vec":
+      print("Loading pretrained vectors...")
       url = "https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz"
       target_path = 'GoogleNews-vectors-negative300.bin.gz'
       response = requests.get(url, stream=True)
