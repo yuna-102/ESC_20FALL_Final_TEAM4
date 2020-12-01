@@ -60,7 +60,7 @@ def main():
                                                 freeze_embedding=False,
                                                 learning_rate=args.learning_rate,
                                                 dropout=args.dropout)
-    train.train(cnn_non_static, optimizer, train_dataloader, val_dataloader, epochs=20)
+    train.train(cnn_non_static, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
 
 if __name__ == '__main__':
 	main()
