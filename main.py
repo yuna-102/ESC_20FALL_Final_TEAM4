@@ -59,7 +59,7 @@ def main():
     cnn_non_static, optimizer = model.initilize_model(pretrained_embedding=embeddings,
                                                 freeze_embedding=False,
                                                 learning_rate=args.learning_rate,
-                                                dropout=dropout)
+                                                dropout=args.dropout)
     train.train(cnn_non_static, optimizer, train_dataloader, val_dataloader, epochs=20)
 
 if __name__ == '__main__':
