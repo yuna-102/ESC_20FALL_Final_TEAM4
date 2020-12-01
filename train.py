@@ -1,5 +1,6 @@
 import random
 import time
+import torch
 import torch.nn as nn
 import device
 import numpy as np

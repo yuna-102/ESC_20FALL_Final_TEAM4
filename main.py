@@ -29,7 +29,7 @@ def main():
   train_inputs, val_inputs, train_labels, val_labels = train_test_split(input_ids, labels, test_size=0.1, random_state=42)
 
   print("Creating Dataloader...\n")
-  train_dataloader, val_dataloader = data_loader(train_inputs, val_inputs, train_labels, val_labels, batch_size = args.batch_size)
+  train_dataloader, val_dataloader = dataset.data_loader(train_inputs, val_inputs, train_labels, val_labels, batch_size = args.batch_size)
   
 
 
