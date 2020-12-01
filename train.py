@@ -2,6 +2,7 @@ import random
 import time
 import torch.nn as nn
 import device
+import numpy as np
 
 device = torch_device()
 # Specify loss function

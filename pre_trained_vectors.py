@@ -14,14 +14,6 @@ def load_pretrained_fasttext(word2idx, fname):
             the size of word2idx and d is embedding dimension
     """
 
-    print("Loading pretrained vectors...")
-    URL = "https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip"
-    FILE = "fastText"
-
-    wget.download(URL)
-    with zipfile.ZipFile('crawl-300d-2M.vec.zip', 'r') as zip_ref:
-      zip_ref.extractall()
-
     fin = open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
     n, d = map(int, fin.readline().split())
 
@@ -82,3 +74,17 @@ def load_pretrained_word2vec(word2idx, fname):
     print(f"There are {count} / {len(word2idx)} pretrained vectors found.")
 
     return embeddings
+
+
+def get_vector(vectors):
+    vectors = args.
+    print("Loading pretrained vectors...")
+    url = "https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip"
+    target_path = 'crawl-300d-2M.vec.zip'
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        with open(target_path, 'wb') as f:
+            f.write(response.raw.read())
+
+    with zipfile.ZipFile('crawl-300d-2M.vec.zip', 'r') as zip_ref:
+      zip_ref.extractall()
