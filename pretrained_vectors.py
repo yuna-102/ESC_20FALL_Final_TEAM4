@@ -4,6 +4,7 @@ import zipfile
 import requests
 import gzip
 import torch
+import numpy as np
 
 def load_pretrained_fasttext(word2idx, fname):
   """Load pretrained vectors and create embedding layers.

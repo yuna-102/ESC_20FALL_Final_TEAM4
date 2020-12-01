@@ -56,7 +56,7 @@ def main():
     # CNN-non-static: fastText pretrained word vectors are fine-tuned during training.
     train.set_seed(42)
     embeddings = pretrained_vectors.get_embeddings(word2idx, args.pretrained_word_vectors )
-    cnn_non_static, optimizer = model.initilize_model(pretrained_embedding = embeddings,
+    cnn_non_static, optimizer = model.initilize_model(pretrained_embedding=embeddings,
                                                 freeze_embedding=False,
                                                 learning_rate=args.learning_rate,
                                                 dropout=dropout)
