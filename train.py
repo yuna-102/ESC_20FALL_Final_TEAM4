@@ -1,7 +1,9 @@
 import random
 import time
 import torch.nn as nn
+import device
 
+device = torch_device()
 # Specify loss function
 loss_fn = nn.CrossEntropyLoss()
 
