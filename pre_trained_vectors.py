@@ -76,15 +76,37 @@ def load_pretrained_word2vec(word2idx, fname):
     return embeddings
 
 
-def get_vector(vectors):
-    vectors = args.
-    print("Loading pretrained vectors...")
-    url = "https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip"
-    target_path = 'crawl-300d-2M.vec.zip'
-    response = requests.get(url, stream=True)
-    if response.status_code == 200:
-        with open(target_path, 'wb') as f:
-            f.write(response.raw.read())
+def get_vector(input_vectors):
+    word_vectors = input_vectors
+    if vectors == "fasttext":
+      print("Loading pretrained vectors...")
+      url = "https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip"
+      target_path = 'crawl-300d-2M.vec.zip'
+      response = requests.get(url, stream=True)
+      if response.status_code == 200:
+          with open(target_path, 'wb') as f:
+              f.write(response.raw.read())
 
-    with zipfile.ZipFile('crawl-300d-2M.vec.zip', 'r') as zip_ref:
-      zip_ref.extractall()
+      with zipfile.ZipFile('crawl-300d-2M.vec.zip', 'r') as zip_ref:
+        zip_ref.extractall()
+
+      embeddings = load_pretrained_vectors(word2idx, "fastText/crawl-300d-2M.vec")
+      embeddings = torch.tensor(embeddings)
+         
+    elif word_vectors == "Word2Vec":
+      url = "https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz"
+      target_path = 'GoogleNews-vectors-negative300.bin.gz'
+      response = requests.get(url, stream=True)
+      if response.status_code == 200:
+          with open(target_path, 'wb') as f:
+              f.write(response.raw.read())
+
+      with gzip.open("GoogleNews-vectors-negative300.bin.gz", "rt") as file:
+        content = file.read()   
+
+      embeddings = load_pretrained_vectors_word2vec(word2idx, 'GoogleNews-vectors-negative300.bin')
+      embeddings = torch.tensor(embeddings)
+    
+    else: pass
+
+    return embeddings
