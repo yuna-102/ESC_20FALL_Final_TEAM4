@@ -6,7 +6,7 @@ import model
 import train
 import dataset
 import pretrained_vectors
-
+from sklearn.model_selection import train_test_split
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -19,9 +19,21 @@ def main():
  	parser.add_argument("--pretrained-word-vectors", default="fasttext", help="available models: fasttext, Word2Vec")
  
   args = parser.parse_args()
+  
+  # load data
+  print("Load data...\n")
+  texts, labels = dataset.load_data()
 
+  print("Tokenizing...\n")
+  tokenized_texts, word2idx, max_len = dataset.tokenize(texts)
+  input_ids = dataset.encode(tokenized_texts, word2idx, max_len)
+  train_inputs, val_inputs, train_labels, val_labels = train_test_split(input_ids, labels, test_size=0.1, random_state=42)
+
+  print("Creating Dataloader...\n")
   train_dataloader, val_dataloader = data_loader(train_inputs, val_inputs, train_labels, val_labels, batch_size = args.batch_size)
   
+
+
   if args.mode == 'rand':
     # CNN-rand: Word vectors are randomly initialized.
     train.set_seed(42)

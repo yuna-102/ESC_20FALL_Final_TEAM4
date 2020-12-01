@@ -15,6 +15,19 @@ from collections import defaultdict
 
 
 def load_data():
+    # Download Datasets
+    url = 'http://www.cs.cornell.edu/people/pabo/movie-review-data/rt-polaritydata.tar.gz'
+    target_path = 'rt-polaritydata.tar.gz'
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        with open(target_path, 'wb') as f:
+            f.write(response.raw.read())
+    # Unzip
+    fname = './rt-polaritydata.tar.gz'  
+    unzip_tar = tarfile.open(fname)     
+    unzip_tar.extractall('./Data/')         
+    unzip_tar.close()  
+
   def load_text(path):
       """Load text data, lowercase text and save to a list."""
 
@@ -144,27 +157,3 @@ def data_loader(train_inputs, val_inputs, train_labels, val_labels,
 
     return train_dataloader, val_dataloader
 
-def Load_data_to_DataLoader():
-    
-    # Download Datasets
-    wget.download('http://www.cs.cornell.edu/people/pabo/movie-review-data/rt-polaritydata.tar.gz')
-
-    # Unzip
-    fname = './rt-polaritydata.tar.gz'  
-    ap = tarfile.open(fname)     
-    ap.extractall('./Data/')         
-    ap.close()    
-
-    texts, labels = load_data()
-
-    print("Tokenizing...\n")
-    tokenized_texts, word2idx, max_len = tokenize(texts)
-    input_ids = encode(tokenized_texts, word2idx, max_len)
-
-    train_inputs, val_inputs, train_labels, val_labels = train_test_split(
-        input_ids, labels, test_size=0.1, random_state=42)
-
-    # Load data to PyTorch DataLoader
-    train_dataloader, val_dataloader = data_loader(train_inputs, val_inputs, train_labels, val_labels, batch_size=50)
-    
-    return train_dataloader, val_dataloader
