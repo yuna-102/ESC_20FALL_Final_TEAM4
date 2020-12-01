@@ -1,123 +1,117 @@
-import argparse
-import copy
-import os
-import torch
+import random
+import time
+import torch.nn as nn
 
-from torch import nn, optim
-from tensorboardX import SummaryWriter
-from time import gmtime, strftime
+# Specify loss function
+loss_fn = nn.CrossEntropyLoss()
 
-from model import CNNSentence
-from data import DATA, getVectors
-from test import test
+def set_seed(seed_value=42):
+    """Set seed for reproducibility."""
 
+    random.seed(seed_value)
+    np.random.seed(seed_value)
+    torch.manual_seed(seed_value)
+    torch.cuda.manual_seed_all(seed_value)
 
-def train(args, data, vectors):
-	
-	model = CNNSentence(args, data, vectors)
-	model.to(torch.device(args.device))
+def train(model, optimizer, train_dataloader, val_dataloader=None, epochs=10):
+    """Train the CNN model."""
+    
+    # Tracking best validation accuracy
+    best_accuracy = 0
 
-	parameters = filter(lambda p: p.requires_grad, model.parameters())
-	optimizer = optim.Adadelta(parameters, lr=args.learning_rate)
-	criterion = nn.CrossEntropyLoss()
+    # Start training loop
+    print("Start training...\n")
+    print(f"{'Epoch':^7} | {'Train Loss':^12} | {'Val Loss':^10} | {'Val Acc':^9} | {'Elapsed':^9}")
+    print("-"*60)
 
-	writer = SummaryWriter(log_dir='runs/' + args.model_time)
+    for epoch_i in range(epochs):
+        # =======================================
+        #               Training
+        # =======================================
 
-	model.train()
-	acc, loss, size, last_epoch = 0, 0, 0, -1
-	max_test_acc = 0
+        # Tracking time and loss
+        t0_epoch = time.time()
+        total_loss = 0
 
-	print_summary = False
-	iterator = data.train_iter
-	for i, batch in enumerate(iterator):
-		present_epoch = int(iterator.epoch)
-		if present_epoch == args.epoch:
-			break
-		if present_epoch > last_epoch:
-			print('epoch:', present_epoch + 1)
-			print_summary = True
-		last_epoch = present_epoch
-		
+        # Put the model into the training mode
+        model.train()
 
-		pred = model(batch)
+        for step, batch in enumerate(train_dataloader):
+            # Load batch to GPU
+            b_input_ids, b_labels = tuple(t.to(device) for t in batch)
 
-		optimizer.zero_grad()
-		batch_loss = criterion(pred, batch.label)
-		loss += batch_loss.item()
-		batch_loss.backward()
-		nn.utils.clip_grad_norm_(parameters, max_norm=args.norm_limit)
-		optimizer.step()
+            # Zero out any previously calculated gradients
+            model.zero_grad()
 
-		_, pred = pred.max(dim=1)
-		acc += (pred == batch.label).sum().float()
-		size += len(pred)
+            # Perform a forward pass. This will return logits.
+            logits = model(b_input_ids)
 
-		if print_summary:
-			print_summary = False
-			acc /= size
-			acc = acc.cpu().item()
-			test_loss, test_acc = test(model, data)
-			c = present_epoch
+            # Compute loss and accumulate the loss values
+            loss = loss_fn(logits, b_labels)
+            total_loss += loss.item()
 
-			writer.add_scalar('loss/train', loss, c)
-			writer.add_scalar('acc/train', acc, c)
-			writer.add_scalar('loss/test', test_loss, c)
-			writer.add_scalar('acc/test', test_acc, c)
+            # Perform a backward pass to calculate gradients
+            loss.backward()
 
-			print(f'train loss: {loss:.3f} / test loss: {test_loss:.3f}'
-				  f' / train acc: {acc:.3f} / test acc: {test_acc:.3f}')
+            # Update parameters
+            optimizer.step()
 
-			if test_acc > max_test_acc:
-				max_test_acc = test_acc
-				best_model = copy.deepcopy(model)
+        # Calculate the average loss over the entire training data
+        avg_train_loss = total_loss / len(train_dataloader)
 
-			acc, loss, size = 0, 0, 0
-			model.train()
+        # =======================================
+        #               Evaluation
+        # =======================================
+        if val_dataloader is not None:
+            # After the completion of each training epoch, measure the model's
+            # performance on our validation set.
+            val_loss, val_accuracy = evaluate(model, val_dataloader)
 
-	writer.close()
-	print(f'max test acc: {max_test_acc:.3f}')
+            # Track the best accuracy
+            if val_accuracy > best_accuracy:
+                best_accuracy = val_accuracy
 
-	return best_model
+            # Print performance over the entire training data
+            time_elapsed = time.time() - t0_epoch
+            print(f"{epoch_i + 1:^7} | {avg_train_loss:^12.6f} | {val_loss:^10.6f} | {val_accuracy:^9.2f} | {time_elapsed:^9.2f}")
+            
+    print("\n")
+    print(f"Training complete! Best accuracy: {best_accuracy:.2f}%.")
 
+def evaluate(model, val_dataloader):
+    """After the completion of each training epoch, measure the model's
+    performance on our validation set.
+    """
+    # Put the model into the evaluation mode. The dropout layers are disabled
+    # during the test time.
+    model.eval()
 
-def main():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--batch-size', default=50, type=int)
-	parser.add_argument('--dataset', default='TREC', help="available datasets: MR, TREC, SST-1, SST-2, SUBJ")
-	parser.add_argument('--dropout', default=0.5, type=float)
-	parser.add_argument('--epoch', default=300, type=int)
-	parser.add_argument('--gpu', default=1, type=int)
-	parser.add_argument('--learning-rate', default=0.1, type=float)
-	parser.add_argument('--word-dim', default=300, type=int)
-	parser.add_argument('--norm-limit', default=3.0, type=float)
-	parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static, multichannel")
-	parser.add_argument('--num-feature-maps', default=100, type=int)
+    # Tracking variables
+    val_accuracy = []
+    val_loss = []
 
-	args = parser.parse_args()
+    # For each batch in our validation set...
+    for batch in val_dataloader:
+        # Load batch to GPU
+        b_input_ids, b_labels = tuple(t.to(device) for t in batch)
 
-	print('loading', args.dataset, 'data...')
-	data = DATA(args)
-	vectors = getVectors(args, data)
+        # Compute logits
+        with torch.no_grad():
+            logits = model(b_input_ids)
 
-	setattr(args, 'word_vocab_size', len(data.TEXT.vocab))
-	setattr(args, 'class_size', len(data.LABEL.vocab))
-	setattr(args, 'model_time', strftime('%H:%M:%S', gmtime()))
-	setattr(args, 'FILTER_SIZES', [3, 4, 5])
+        # Compute loss
+        loss = loss_fn(logits, b_labels)
+        val_loss.append(loss.item())
 
-	if args.gpu > -1:
-		setattr(args, 'device', "cuda:0")
-	else:
-		setattr(args, 'device', "cpu")
+        # Get the predictions
+        preds = torch.argmax(logits, dim=1).flatten()
 
-	print('training start!')
-	best_model = train(args, data, vectors)
+        # Calculate the accuracy rate
+        accuracy = (preds == b_labels).cpu().numpy().mean() * 100
+        val_accuracy.append(accuracy)
 
-	if not os.path.exists('saved_models'):
-		os.makedirs('saved_models')
-	torch.save(best_model.state_dict(), f'saved_models/CNN_Sentece_{args.dataset}_{args.model_time}.pt')
+    # Compute the average accuracy and loss over the validation set.
+    val_loss = np.mean(val_loss)
+    val_accuracy = np.mean(val_accuracy)
 
-	print('training finished!')
-
-
-if __name__ == '__main__':
-	main()
+    return val_loss, val_accuracy
