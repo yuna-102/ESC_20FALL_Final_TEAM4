@@ -15,18 +15,18 @@ from collections import defaultdict
 
 
 def load_data():
-    # Download Datasets
-    url = 'http://www.cs.cornell.edu/people/pabo/movie-review-data/rt-polaritydata.tar.gz'
-    target_path = 'rt-polaritydata.tar.gz'
-    response = requests.get(url, stream=True)
-    if response.status_code == 200:
-        with open(target_path, 'wb') as f:
-            f.write(response.raw.read())
-    # Unzip
-    fname = './rt-polaritydata.tar.gz'  
-    unzip_tar = tarfile.open(fname)     
-    unzip_tar.extractall('./Data/')         
-    unzip_tar.close()  
+  # Download Datasets
+  url = 'http://www.cs.cornell.edu/people/pabo/movie-review-data/rt-polaritydata.tar.gz'
+  target_path = 'rt-polaritydata.tar.gz'
+  response = requests.get(url, stream=True)
+  if response.status_code == 200:
+      with open(target_path, 'wb') as f:
+          f.write(response.raw.read())
+  # Unzip
+  fname = './rt-polaritydata.tar.gz'  
+  unzip_tar = tarfile.open(fname)     
+  unzip_tar.extractall('./Data/')         
+  unzip_tar.close()  
 
   def load_text(path):
       """Load text data, lowercase text and save to a list."""

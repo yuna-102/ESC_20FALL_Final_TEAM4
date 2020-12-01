@@ -5,7 +5,7 @@ import torch.optim as optim
 import device
 import numpy as np
 
-device = torch_device()
+device = device.torch_device()
 
 class CNN_NLP(nn.Module):
     """An 1D Convulational Neural Network for Sentence Classification."""

@@ -9,15 +9,14 @@ import pretrained_vectors
 from sklearn.model_selection import train_test_split
 
 def main():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--batch-size', default=50, type=int)
-	parser.add_argument('--dropout', default=0.5, type=float)
-	parser.add_argument('--epoch', default=300, type=int)
-	parser.add_argument('--learning-rate', default=0.1, type=float)
-	parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static")
-	parser.add_argument('--num-feature-maps', default=100, type=int) 
- 	parser.add_argument("--pretrained-word-vectors", default="fasttext", help="available models: fasttext, Word2Vec")
- 
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--batch-size', default=50, type=int)
+  parser.add_argument('--dropout', default=0.5, type=float)
+  parser.add_argument('--epoch', default=300, type=int)
+  parser.add_argument('--learning-rate', default=0.1, type=float)
+  parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static")
+  parser.add_argument('--num-feature-maps', default=100, type=int) 
+  parser.add_argument("--pretrained-word-vectors", default="fasttext", help="available models: fasttext, Word2Vec")
   args = parser.parse_args()
   
   # load data
