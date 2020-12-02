@@ -38,7 +38,6 @@ def main():
 
   if args.mode == 'rand':
     # CNN-rand: Word vectors are randomly initialized.
-    mode = args.mode
     train.set_seed(42)
     cnn_model, optimizer = model.initilize_model(vocab_size=len(word2idx),
                                           embed_dim=300,
@@ -49,7 +48,6 @@ def main():
 
   elif args.mode == 'static':
     # CNN-static: fastText pretrained word vectors are used and freezed during training.
-    mode = args.mode
     train.set_seed(42)
     embeddings = pretrained_vectors.get_embeddings(word2idx, args.pretrained_word_vectors )
     cnn_model, optimizer = model.initilize_model(pretrained_embedding=embeddings,
@@ -60,7 +58,6 @@ def main():
 
   else:
     # CNN-non-static: fastText pretrained word vectors are fine-tuned during training.
-    mode = args.mode
     train.set_seed(42)
     embeddings = pretrained_vectors.get_embeddings(word2idx, args.pretrained_word_vectors )
     cnn_model, optimizer = model.initilize_model(pretrained_embedding=embeddings,
@@ -71,7 +68,7 @@ def main():
 
 
   if args.save_word_vectors == True:
-    save_embeddings.write_embeddings('trained_embeddings_{}.txt'.format(mode),
+    save_embeddings.write_embeddings('trained_embeddings_{}_{}.txt'.format(args.mode),
     cnn_model.embedding.weight.data,
     word2idx)
 
