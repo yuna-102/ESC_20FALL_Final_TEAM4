@@ -7,6 +7,7 @@ import train
 import dataset
 import pretrained_vectors
 from sklearn.model_selection import train_test_split
+import save_embeddings
 
 def main():
   parser = argparse.ArgumentParser()
@@ -17,6 +18,7 @@ def main():
   parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static")
   parser.add_argument('--num-feature-maps', default=100, type=int) 
   parser.add_argument("--pretrained-word-vectors", default="fasttext", help="available models: fasttext, Word2Vec")
+  parser.add_argument("--save-word-vectors", action='store_true', default=False, help='save trained word vectors')
   args = parser.parse_args()
   
   # load data
@@ -41,6 +43,10 @@ def main():
                                           learning_rate=args.learning_rate,
                                           dropout=args.dropout)
     train.train(cnn_rand, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
+    if args.save_word_vectors is not None:
+      save_embeddings.write_embeddings('trained_embeddings_rand.txt', 
+                  cnn_rand.embedding.weight.data, 
+                  word2idx)
 
   elif args.mode == 'static':
     # CNN-static: fastText pretrained word vectors are used and freezed during training.
@@ -51,7 +57,10 @@ def main():
                                             learning_rate=args.learning_rate,
                                             dropout=args.dropout)
     train.train(cnn_static, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
-
+    if args.save_word_vectors is not None:
+      save_embeddings.write_embeddings('trained_embeddings_static.txt', 
+                  cnn_static.embedding.weight.data, 
+                  word2idx)   
   else:
     # CNN-non-static: fastText pretrained word vectors are fine-tuned during training.
     train.set_seed(42)
@@ -61,6 +70,13 @@ def main():
                                                 learning_rate=args.learning_rate,
                                                 dropout=args.dropout)
     train.train(cnn_non_static, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
+    if args.save_word_vectors is not None:
+      save_embeddings.write_embeddings('trained_embeddings_non_static.txt', 
+                  cnn_non_static.embedding.weight.data, 
+                  word2idx)     
+
+
+  
 
 if __name__ == '__main__':
 	main()
