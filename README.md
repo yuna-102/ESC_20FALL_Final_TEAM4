@@ -31,18 +31,7 @@ ESC_20FALL_Final_TEAM4
 
 
 ## 3. Implementation
-> python main.py --help
-  parser.add_argument('--batch-size', default=50, type=int)
-  parser.add_argument('--dropout', default=0.5, type=float)
-  parser.add_argument('--epoch', default=20, type=int)
-  parser.add_argument('--learning-rate', default=0.1, type=float)
-  parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static")
-  parser.add_argument('--num-feature-maps', default=100, type=int) 
-  parser.add_argument("--pretrained-word-vectors", default="fasttext", help="available models: fasttext, Word2Vec")
-  parser.add_argument("--save-word-vectors", action='store_true', default=False, help='save trained word vectors')
-  parser.add_argument("--predict", action='store_true', default=False, help='classify your sentence')
-  args = parser.parse_args()
-  
+ 
     usage: main.py [-h] [--batch-size BATCH_SIZE] [--dropout DROPOUT] 
                     [--epoch EPOCH] [--learning-rate LEARNING_RATE]
                     [----predict PREDICT] [--mode MODE]
@@ -79,7 +68,8 @@ Re-implementation with Word2Vec and fasttext
 > | random | *73.11 | *73.11 | 
 > | static | 81.30 | 82.56 | 
 > | non-static | 81.75| 82.65 |
-* *no pre-trained word vector
+
+  *no pre-trained word vector
 
 
 
