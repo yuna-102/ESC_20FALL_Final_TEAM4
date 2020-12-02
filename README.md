@@ -30,7 +30,36 @@ ESC_20FALL_Final_TEAM4
 > |[a] rare , beautiful film . | a rare , beautiful film . |
 
 
-## 3. Training
+## 3. Implementation
+> python main.py --help
+  parser.add_argument('--batch-size', default=50, type=int)
+  parser.add_argument('--dropout', default=0.5, type=float)
+  parser.add_argument('--epoch', default=20, type=int)
+  parser.add_argument('--learning-rate', default=0.1, type=float)
+  parser.add_argument("--mode", default="non-static", help="available models: rand, static, non-static")
+  parser.add_argument('--num-feature-maps', default=100, type=int) 
+  parser.add_argument("--pretrained-word-vectors", default="fasttext", help="available models: fasttext, Word2Vec")
+  parser.add_argument("--save-word-vectors", action='store_true', default=False, help='save trained word vectors')
+  parser.add_argument("--predict", action='store_true', default=False, help='classify your sentence')
+  args = parser.parse_args()
+  
+    usage: main.py [-h] [--batch-size BATCH_SIZE] [--dropout DROPOUT] 
+                    [--epoch EPOCH] [--learning-rate LEARNING_RATE]
+                    [----predict PREDICT] [--mode MODE]
+                    [--num-feature-maps NUM_FEATURE_MAPS]
+                    [--pretrained-word-vectors PRETRAINED_WORD_VECTORS]
+                    [--save-word-vectors SAVE_WORD_VECTORS]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --batch-size BATCH_SIZE
+      --dropout DROPOUT
+      --epoch EPOCH
+      --learning-rate LEARNING_RATE
+      --mode MODE           available models: rand, static, non-static,
+      --num-feature-maps NUM_FEATURE_MAPS
+      --pretrained-word-vectors           available models: fasttext, Word2Vec
+      --save-word-vectors SAVE_WORD_VECTORS           default:False
 
 
 ## 4. Results
