@@ -10,7 +10,7 @@ ESC_20FALL_Final_TEAM4
 ~~~
 
 ## 1. Dataset
-> Naver sentiment movie corpus v1.0
+> MR Dataset Sentiment Polarity Dataset Version 2.0  http://www.cs.cornell.edu/people/pabo/movie-review-data/
 > |text|label|
 > |------|----|
 > |simplistic , silly and tedious .	|negative|
