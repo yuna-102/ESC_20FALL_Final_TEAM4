@@ -1,6 +1,7 @@
 ESC_20FALL_Final_TEAM4
 =======================
 # CNN을 이용한 MR(Movie Review) 데이터 감성 분석
+Pytorch re-implementation of Convolutional Neural Networks for Sentence Classification.
 
 ## Requirements
 
