@@ -34,7 +34,7 @@ ESC_20FALL_Final_TEAM4
 
 
 ## 4. Results
-> Baseline from the paper
+Baseline from the paper
 
 > | Model | MR | 
 > | ----- | -- | 
@@ -43,22 +43,15 @@ ESC_20FALL_Final_TEAM4
 > | non-static | 81.5 | 
 
 
-> Re-implementation 
+Re-implementation with Word2Vec and fasttext
 
-> | Model | MR | 
-> | ----- | -- | 
-> | random | 73.11 | 
-> | static | 81.30 | 
-> | non-static | 81.75| 
+> | Model | MR (Word2Vec) | MR (fasttext) |
+> | ----- | -- | -- | 
+> | random | *73.11 | *73.11 | 
+> | static | 81.30 | 82.56 | 
+> | non-static | 81.75| 82.65 |
+* *no pre-trained word vector
 
-
-> Re-implementation with fasttext
-
-> | Model | MR | 
-> | ----- | -- | 
-> | random | 73.11 | 
-> | static | 82.56 | 
-> | non-static | 82.65 | 
 
 
 
