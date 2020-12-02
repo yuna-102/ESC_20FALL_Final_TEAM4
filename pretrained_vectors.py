@@ -5,6 +5,8 @@ import requests
 import gzip
 import torch
 import numpy as np
+import shutil
+
 
 def load_pretrained_fasttext(word2idx, fname):
   """Load pretrained vectors and create embedding layers.
@@ -51,7 +53,6 @@ def load_pretrained_word2vec(word2idx, fname):
           the size of word2idx and d is embedding dimension
   """
 
-  print("Loading pretrained vectors...")
   word2vec_model = gensim.models.KeyedVectors.load_word2vec_format(fname, binary=True)  
   n = word2vec_model.vectors.shape[0]
   d = word2vec_model.vectors.shape[1]
@@ -107,10 +108,10 @@ def get_embeddings(word2idx, input_vectors):
         with open(target_path, 'wb') as f:
             f.write(response.raw.read())
 
-    with gzip.open("GoogleNews-vectors-negative300.bin.gz", "rt") as file:
-      content = file.read()   
+    with gzip.open('GoogleNews-vectors-negative300.bin.gz', 'r') as f_in, open('GoogleNews-vectors-negative300.bin', 'wb') as f_out:
+      shutil.copyfileobj(f_in, f_out)
 
-    embeddings = load_pretrained_vectors_word2vec(word2idx, 'GoogleNews-vectors-negative300.bin')
+    embeddings = load_pretrained_word2vec(word2idx, "GoogleNews-vectors-negative300.bin")
     embeddings = torch.tensor(embeddings)
   
   else: pass
