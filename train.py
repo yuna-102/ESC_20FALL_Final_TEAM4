@@ -4,6 +4,9 @@ import torch
 import torch.nn as nn
 import device
 import numpy as np
+import torch.nn.functional as F
+from nltk.tokenize import word_tokenize
+import dataset
 
 device = device.torch_device()
 # Specify loss function
@@ -119,3 +122,23 @@ def evaluate(model, val_dataloader):
     val_accuracy = np.mean(val_accuracy)
 
     return val_loss, val_accuracy
+
+def predict(text, model, word2idx, max_len=62):
+    """Predict probability that a review is positive."""
+
+    # Tokenize, pad and encode text
+    text = dataset.clean_str(text)
+    tokens = word_tokenize(text.lower())
+    padded_tokens = tokens + ['<pad>'] * (max_len - len(tokens))
+    input_id = [word2idx.get(token, word2idx['<unk>']) for token in padded_tokens]
+
+    # Convert to PyTorch tensors
+    input_id = torch.tensor(input_id).unsqueeze(dim=0)
+
+    # Compute logits
+    logits = model.forward(input_id)
+
+    #  Compute probability
+    probs = F.softmax(logits, dim=1).squeeze(dim=0)
+
+    print(f"This review is {probs[1] * 100:.2f}% positive.")

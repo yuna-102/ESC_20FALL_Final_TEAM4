@@ -19,6 +19,7 @@ def main():
   parser.add_argument('--num-feature-maps', default=100, type=int) 
   parser.add_argument("--pretrained-word-vectors", default="fasttext", help="available models: fasttext, Word2Vec")
   parser.add_argument("--save-word-vectors", action='store_true', default=False, help='save trained word vectors')
+  parser.add_argument("--predict", action='store_true', default=False, help='classify your sentence')
   args = parser.parse_args()
   
   # load data
@@ -37,43 +38,47 @@ def main():
 
   if args.mode == 'rand':
     # CNN-rand: Word vectors are randomly initialized.
+    mode = args.mode
     train.set_seed(42)
-    cnn_rand, optimizer = model.initilize_model(vocab_size=len(word2idx),
+    cnn_model, optimizer = model.initilize_model(vocab_size=len(word2idx),
                                           embed_dim=300,
                                           learning_rate=args.learning_rate,
                                           dropout=args.dropout)
-    train.train(cnn_rand, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
-    if args.save_word_vectors is not None:
-      save_embeddings.write_embeddings('trained_embeddings_rand.txt', 
-                  cnn_rand.embedding.weight.data, 
-                  word2idx)
+    train.train(cnn_model, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
+
 
   elif args.mode == 'static':
     # CNN-static: fastText pretrained word vectors are used and freezed during training.
+    mode = args.mode
     train.set_seed(42)
     embeddings = pretrained_vectors.get_embeddings(word2idx, args.pretrained_word_vectors )
-    cnn_static, optimizer = model.initilize_model(pretrained_embedding=embeddings,
+    cnn_model, optimizer = model.initilize_model(pretrained_embedding=embeddings,
                                             freeze_embedding=True,
                                             learning_rate=args.learning_rate,
                                             dropout=args.dropout)
-    train.train(cnn_static, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
-    if args.save_word_vectors is not None:
-      save_embeddings.write_embeddings('trained_embeddings_static.txt', 
-                  cnn_static.embedding.weight.data, 
-                  word2idx)   
+    train.train(cnn_model, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
+
   else:
     # CNN-non-static: fastText pretrained word vectors are fine-tuned during training.
+    mode = args.mode
     train.set_seed(42)
     embeddings = pretrained_vectors.get_embeddings(word2idx, args.pretrained_word_vectors )
-    cnn_non_static, optimizer = model.initilize_model(pretrained_embedding=embeddings,
+    cnn_model, optimizer = model.initilize_model(pretrained_embedding=embeddings,
                                                 freeze_embedding=False,
                                                 learning_rate=args.learning_rate,
                                                 dropout=args.dropout)
-    train.train(cnn_non_static, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
-    if args.save_word_vectors is not None:
-      save_embeddings.write_embeddings('trained_embeddings_non_static.txt', 
-                  cnn_non_static.embedding.weight.data, 
-                  word2idx)     
+    train.train(cnn_model, optimizer, train_dataloader, val_dataloader, epochs=args.epoch)
+
+
+  if args.save_word_vectors == True:
+    save_embeddings.write_embeddings('trained_embeddings_{}.txt'.format(mode),
+    cnn_model.embedding.weight.data,
+    word2idx)
+
+  if args.predict == True:
+    x = input('영어 텍스트를 입력하세요! : ')
+    x = str(x)
+    train.predict(x, cnn_model, word2idx)
 
 
   
