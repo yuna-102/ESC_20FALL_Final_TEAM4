@@ -2,6 +2,13 @@ ESC_20FALL_Final_TEAM4
 =======================
 # CNN을 이용한 MR(Movie Review) 데이터 감성 분석
 
+## Requirements
+
+~~~
+  nltk==3.2.5.
+  torch==1.7.0
+~~~
+
 ## 1. Dataset
 > Naver sentiment movie corpus v1.0
 > |text|label|
@@ -21,3 +28,38 @@ ESC_20FALL_Final_TEAM4
 > |Preprocessing 전|Preprocessing 후|
 > |------|----|
 > |[a] rare , beautiful film . | a rare , beautiful film . |
+
+
+## 3. Training
+
+
+## 4. Results
+> Baseline from the paper
+
+> | Model | MR | 
+> | ----- | -- | 
+> | random | 76.1 | 
+> | static | 81.0 | 
+> | non-static | 81.5 | 
+
+
+> Re-implementation 
+
+> | Model | MR | 
+> | ----- | -- | 
+> | random | 73.11 | 
+> | static | 81.30 | 
+> | non-static | 81.75| 
+
+
+> Re-implementation with fasttext
+
+> | Model | MR | 
+> | ----- | -- | 
+> | random | 73.11 | 
+> | static | 82.56 | 
+> | non-static | 82.65 | 
+
+
+
+
