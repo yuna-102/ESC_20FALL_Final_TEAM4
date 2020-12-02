@@ -68,7 +68,7 @@ def main():
 
 
   if args.save_word_vectors == True:
-    save_embeddings.write_embeddings('trained_embeddings_{}_{}.txt'.format(args.mode),
+    save_embeddings.write_embeddings('trained_embeddings_{}.txt'.format(args.mode),
     cnn_model.embedding.weight.data,
     word2idx)
 
