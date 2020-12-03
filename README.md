@@ -62,8 +62,7 @@ You will get:
       --pretrained-word-vectors           available models: fasttext, Word2Vec
       --save-word-vectors SAVE_WORD_VECTORS           default:False
       
-> 또는 cnn_for_sentence_classification.ipynb를 통해 colab으로 연결하여 바로 실행 해볼 수 있습니다.
-* 실행하기 : https://colab.research.google.com/github/yuna-102/ESC_20FALL_Final_TEAM4/blob/main/cnn_for_sentence_classification.ipynb
+> 또는 [cnn_for_sentence_classification.ipynb](https://colab.research.google.com/github/yuna-102/ESC_20FALL_Final_TEAM4/blob/main/cnn_for_sentence_classification.ipynb)를 통해 colab으로 연결하여 바로 실행 해볼 수 있습니다.
 
 
 ## 5. References
