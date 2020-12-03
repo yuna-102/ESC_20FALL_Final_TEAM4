@@ -76,13 +76,15 @@ def main():
     x = input('영어 텍스트를 입력하세요! : ')
     x = str(x)
     train.predict(x, cnn_model, word2idx)
-    while True: 
-      conti = input('계속할까요? (좋아/싫어) : ')
-      if conti == '좋아':
-        y = input('영어 텍스트를 입력하세요! : ')
-        y = str(y)
-        train.predict(y, cnn_model, word2idx)
-      else: break
+
+    x1 = input('영어 텍스트를 입력하세요! : ')
+    x1 = str(x1)
+    train.predict(x1, cnn_model, word2idx)
+    
+    x2 = input('영어 텍스트를 입력하세요! : ')
+    x2 = str(x2)
+    train.predict(x2, cnn_model, word2idx)
+
 
 
 
