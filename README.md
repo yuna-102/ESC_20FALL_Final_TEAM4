@@ -72,7 +72,7 @@ Re-implementation with Word2Vec and fasttext
 > | static | 81.30 | 82.56 | 
 > | non-static | 81.75| 82.65 |
 
-  *not use pre-trained word vector
+  *cnn-rand의 경우 pre-trained word vector를 사용하지 않음
 
 
 
