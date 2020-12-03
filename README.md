@@ -1,6 +1,7 @@
 ESC_20FALL_Final_TEAM4
 =======================
 # CNN을 이용한 MR(Movie Review) 데이터 감성 분석
+### ESC NLP 4조 최정윤, 신예진, 김민규, 오다건
 Pytorch re-implementation of Convolutional Neural Networks for Sentence Classification.
 
 ## Requirements
@@ -32,7 +33,17 @@ Pytorch re-implementation of Convolutional Neural Networks for Sentence Classifi
 
 
 ## 3. Implementation
- 
+~~~
+python main.py --mode rand
+python main.py --mode static
+python main.py --mode non-static
+~~~
+or
+~~~
+python main.py --help
+~~~
+You will get:
+
     usage: main.py [-h] [--batch-size BATCH_SIZE] [--dropout DROPOUT] 
                     [--epoch EPOCH] [--learning-rate LEARNING_RATE]
                     [----predict PREDICT] [--mode MODE]
@@ -54,25 +65,16 @@ Pytorch re-implementation of Convolutional Neural Networks for Sentence Classifi
 > 또는 cnn_for_sentence_classification.ipynb를 통해 colab으로 연결하여 바로 실행 해볼 수 있습니다.
 * 실행하기 : https://colab.research.google.com/github/yuna-102/ESC_20FALL_Final_TEAM4/blob/main/cnn_for_sentence_classification.ipynb
 
-## 4. Results
-Baseline from the paper
 
-> | Model | MR | 
-> | ----- | -- | 
-> | random | 76.1 | 
-> | static | 81.0 | 
-> | non-static | 81.5 | 
+## 5. References
 
+[Convolutional Neural Networks for Sentence Classification](https://arxiv.org/abs/1408.5882)
 
-Re-implementation with Word2Vec and fasttext
+[Kim's implementation of the model in Theano](https://github.com/yoonkim/CNN_sentence)
 
-> | Model | MR (Word2Vec) | MR (fasttext) |
-> | ----- | -- | -- | 
-> | random | *73.11 | *73.11 | 
-> | static | 81.30 | 82.56 | 
-> | non-static | 81.75| 82.65 |
+[Shawn's implementation of the model in Theano](https://github.com/Shawn1993/cnn-text-classification-pytorch)
 
-  *cnn-rand의 경우 pre-trained word vector를 사용하지 않음
+[Chriskhanhtran's implementation of the model in Pytorch](https://chriskhanhtran.github.io/posts/cnn-sentence-classification/)
 
 
 
