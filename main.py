@@ -75,6 +75,7 @@ def main():
   if args.predict == True:
     x = input('영어 텍스트를 입력하세요! : ')
     x = str(x)
+    train.predict(x, cnn_model, word2idx)	
     while True:
       conti = input('계속하시겠습니까? (y/n) : ')
       if conti == 'y':
